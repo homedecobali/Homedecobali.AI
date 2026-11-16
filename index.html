@@ -464,20 +464,26 @@ body.staff .chips button.alt{background:var(--hdb-white)}
     var r=document.createElement('div'); r.className='row a';
     var m=document.createElement('div'); m.className='msg job';
     var pc = job.selection && job.selection.price_change;
+    var cm = job.copies_mode || (job.selection && job.selection.copies) || '';
+    var hasOrd = job.labels.some(function(l){ return typeof l.ordered === 'number' });
     var rows = job.labels.map(function(l,i){
       var changed = Math.abs((l.base_price||0) - l.price) > 0.001;
       return '<tr><td class="n">'+escH(l.sku)+'</td><td>'+escH(l.name)+'</td><td class="n">'
         + (changed ? '<s>'+escH(String(l.base_price).replace('.',','))+'</s>' : '') + escH(l.price_text.replace('EURO ',''))
-        + '</td><td class="n"><input type="number" min="0" max="50" value="'+l.copies+'" data-i="'+i+'" aria-label="Aantal"></td></tr>';
+        + '</td>' + (hasOrd ? '<td class="n">' + (typeof l.ordered === 'number' ? l.ordered : '&mdash;') + '</td>' : '')
+        + '<td class="n"><input type="number" min="0" max="500" value="'+l.copies+'" data-i="'+i+'" aria-label="Aantal"></td></tr>';
     }).join('');
     m.innerHTML = '<h4>Printlijst · <span class="tot"></span></h4>'
       + '<div class="meta">' + escH(job.by || '') + ' · ' + new Date(job.created_at).toLocaleString('nl-NL')
       + (pc ? ' · prijs ' + (pc.mode==='percent' ? (pc.value>0?'+':'')+pc.value+'%' : pc.mode==='amount' ? (pc.value>0?'+':'')+'€'+pc.value : 'vast €'+pc.value) + (job.selection.rounding && job.selection.rounding!=='none' ? ', afgerond ' + ({whole:'op hele euro',95:'op ,95',99:'op ,99',50:'op ,50/,00'}[job.selection.rounding] || '') : '') + ' (alleen op etiket)' : '')
+      + (cm==='ordered' ? ' · aantal = besteld (goederenontvangst)' : cm==='stock' ? ' · aantal = voorraad' : '')
       + '</div>'
       + '<div class="prev"></div>'
-      + '<div class="tbl"><table><thead><tr><th>SKU</th><th>Naam op etiket</th><th>Prijs</th><th>Aantal</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      + '<div class="tbl"><table><thead><tr><th>SKU</th><th>Naam op etiket</th><th>Prijs</th>'+(hasOrd?'<th>Besteld</th>':'')+'<th>Aantal</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
       + '<div class="acts"><button type="button" class="go">Printen</button><button type="button" class="sec one">Eerste etiket printen</button></div>'
       + (job.not_found && job.not_found.length ? '<div class="note">Niet gevonden: '+escH(job.not_found.join(', '))+'</div>' : '')
+      + (job.no_ordered ? '<div class="note">'+job.no_ordered+' product'+(job.no_ordered===1?'':'en')+' zonder besteld aantal staan niet in deze lijst. Vraag "ook de rest, aantal gelijk aan de voorraad" om ze mee te nemen.</div>' : '')
+      + (job.multi_variant && job.multi_variant.length ? '<div class="note">Meerdere varianten, aantal = voorraad per variant: '+escH(job.multi_variant.join(', '))+'</div>' : '')
       + (job.truncated ? '<div class="note">Afgekapt op 500 etiketten; splits de opdracht op.</div>' : '');
     r.appendChild(m); log.appendChild(r);
     var tot = m.querySelector('.tot'), go = m.querySelector('.go');
@@ -487,7 +493,7 @@ body.staff .chips button.alt{background:var(--hdb-white)}
       go.textContent = 'Printen (' + n + ')'; go.disabled = !n;
     }
     m.querySelectorAll('input[type=number]').forEach(function(inp){
-      inp.oninput = function(){ var v = Math.max(0, Math.min(50, parseInt(inp.value,10)||0)); job.labels[+inp.getAttribute('data-i')].copies = v; upd(); saveStaff(); };
+      inp.oninput = function(){ var v = Math.max(0, Math.min(500, parseInt(inp.value,10)||0)); job.labels[+inp.getAttribute('data-i')].copies = v; upd(); saveStaff(); };
     });
     go.onclick = function(){ printLabels(job.labels, go) };
     m.querySelector('.one').onclick = function(){ var l = job.labels[0]; printLabels([{ sku:l.sku, name:l.name, price_text:l.price_text, copies:1 }], this) };

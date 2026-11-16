@@ -51,7 +51,7 @@ Een medewerker typt op homedecobali.ai: *"ik ben marco en mijn code is 1234"*. D
 | Vaste etiketnaam per SKU | `hdb_ai_label_names` (via Dewi: "noem DE… voortaan …") |
 | Migratie | `supabase/migrations/20261107_hdb_ai_staff_labels.sql` |
 
-Na inloggen praat Dewi Nederlands en zet ze **printlijsten** klaar: per SKU, meerdere SKU's, SKU-reeks (prefix), categorie of zoekwoord; aantal 1 / vast / gelijk aan voorraad; prijs +/- % of bedrag of vaste prijs, afronden (hele euro, ,95, ,99, ,50). Prijzen, SKU en voorraad komen live uit Shopify; **prijsaanpassingen gelden alleen op het etiket**.
+Na inloggen praat Dewi Nederlands en zet ze **printlijsten** klaar: per SKU, meerdere SKU's, SKU-reeks (prefix), categorie of zoekwoord; aantal: bij categorie of SKU-reeks standaard het **bestelde aantal** (goederenontvangst: product-metafield `custom.preorder_qty`, zelfde bron als kolom Besteld op de Voorraad Tellijst; producten zonder besteld aantal blijven dan buiten de lijst), bij losse SKU's 1; op verzoek vast aantal of gelijk aan voorraad (max 500 per regel); prijs +/- % of bedrag of vaste prijs, afronden (hele euro, ,95, ,99, ,50). Prijzen, SKU en voorraad komen live uit Shopify; **prijsaanpassingen gelden alleen op het etiket**.
 
 **Etiketnaam** = producttype + modelnaam uit de Spaanse titel (bijv. *Escultura … Modelo Kanawa* → `ESCULTURA KANAWA`), tenzij er een vaste naam is opgeslagen.
 
